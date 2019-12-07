@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>student</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Style the header */
+header {
+  background-color: #666;
+  padding: 30px;
+  text-align: center;
+  font-size: 35px;
+  color: white;
+}
+
+/* Create two columns/boxes that floats next to each other */
+nav {
+  float: left;
+  width: 30%;
+  height: 300px; /* only for demonstration, should be removed */
+  background: #ccc;
+  padding: 20px;
+}
+
+/* Style the list inside the menu */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+form {
+  float: left;
+  padding: 20px;
+  width: 70%;
+  background-color: #f1f1f1;
+  height: 300px; /* only for demonstration, should be removed */
+}
+
+/* Clear floats after the columns */
+section:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the footer */
+footer {
+  background-color: #777;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media (max-width: 600px) {
+  nav, article {
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h2>student</h2>
+</header>
+
+<section>
+  <nav>
+    <ul>
+      <li><a href="co_op.html">student </a></li>	  
+    </ul>
+  </nav>
+  
+  <form>
+		<label for="insId"><b>student ID</b></label>
+		<input type="text" placeholder="Enter student id" id="stu_id" required>
+		<label for="company_name"><b>company name</b></label>
+		<input type="text" placeholder="Enter name" id="cname" required>
+		<label for="start_date"><b>start date</b></label>
+		<input type="date" placeholder="Enter date" id="start_date" required>
+		<label for="end_date"><b>end date</b></label>
+		<input type="date" placeholder="Enter date" id="end_date" required>
+		
+		<input type="submit" value="Update" id="btnUpdate" />
+		<input type="submit" value="Submit" id="btnSubmit"/>
+		
+	</form>
+</section>
+
+<footer>
+  <p>Footer</p>
+</footer>
+
+
+<script>
+	$(document).ready(function(){
+		var params = new window.URLSearchParams(window.location.search);
+		var insId;
+		if (params.get('id')) insId = params.get('id'); //validate the query string
+		if(!params.get('id')) return window.location.href = 'co_op.html'
+		else if (insId=="new")
+		{
+			$('#btnUpdate').hide();
+			$('#stu_id').val('');
+			$('#cname').val('');
+			$('#start_date').val('');
+			$('#end_date').val('');
+			
+		}else if(insId){
+			$('#btnSubmit').hide();
+			$.ajax({
+				type: "GET",
+				url: "http://localhost:8081/api/student_info_db/co_op/"+insId,		
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					console.log(data.data);
+					let student = data.data;
+					var insId=student["s_id"].toString();
+					var cname=student["company_name"].toString();
+					var sdate=student["start_date"].toString();
+					var edate=student["end_date"].toString();
+					
+					$('#stu_id').attr('readonly',true);
+					$('#stu_id').val(insId);
+					$('#cname').val(cname);
+					$('#start_date').val(sdate);
+					$('#end_date').val(edate);
+					
+				}
+			});		
+		}
+		$('#btnUpdate').on('click', function(e){
+			e.preventDefault();
+			let msg;
+			var stu_id = $('#stu_id').val();
+			var cname = $('#cname').val();
+			var start_date = $('#start_date').val();
+			var end_date = $('#end_date').val();
+			if(stu_id === '') msg = 'Please Enter Student Id';
+			else if(cname === '') msg = 'Please Enter Company name';
+			else if(start_date === '') msg = 'Please Select Start Date';
+			else if(end_date === '') msg = 'Please Select End Date';
+			if(msg) return alert(msg);
+			$.ajax({
+				type: "PUT",
+				url: "http://localhost:8081/api/co_op/",
+				dataType: "json",
+				contentType: "application/json",
+				data : JSON.stringify({
+					"stu_id" : stu_id,
+					"cname" : cname,
+					"start_date" : start_date,
+					"end_date": end_date
+				}),
+				success: function(data){
+					console.log(data);
+					alert('Student successfully added');
+				},
+				error: function(err){
+					console.log('err', err);
+					if(err.responseJSON && err.responseJSON.message) return alert(err.responseJSON.message);
+					alert('Server Error : Something went wrong!');
+				}
+			});	
+		});
+		$('#btnSubmit').on('click', function(e){
+			e.preventDefault();
+			let msg;
+			var stu_id = $('#stu_id').val();
+			var cname = $('#cname').val();
+			var start_date = $('#start_date').val();
+			var end_date = $('#end_date').val();
+			if(stu_id === '') msg = 'Please Enter Student Id';
+			else if(cname === '') msg = 'Please Enter Company name';
+			else if(start_date === '') msg = 'Please Select Start Date';
+			else if(end_date === '') msg = 'Please Select End Date';
+			if(msg) return alert(msg);
+			$.ajax({
+				type: "POST",
+				url: "http://localhost:8081/api/co_op/",
+				dataType: "json",
+				contentType: "application/json",
+				data : JSON.stringify({
+					"stu_id" : stu_id,
+					"cname" : cname,
+					"start_date" : start_date,
+					"end_date": end_date
+				}),
+				success: function(data){
+					console.log(data);
+					alert('Student successfully added');
+				},
+				error: function(err){
+					console.log('err', err);
+					if(err.responseJSON && err.responseJSON.message) return alert(err.responseJSON.message);
+					alert('Server Error : Something went wrong!');
+				}
+			});	
+		});
+	});
+	</script>
+
+</body>
+</html>
